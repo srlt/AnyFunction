@@ -123,7 +123,7 @@ Construct with a functor (function and closure).
 
 > **Exception safety:** same as functor selected *constructor* and `operator new`.
 
-> **NB:** here `Functor` is a *forwarding reference*, not necessarily an r-value reference.
+> **NB:** here `Functor` is a *forwarding reference*, not necessarily a r-value reference.
 
 &nbsp;
 
@@ -142,7 +142,7 @@ Assign a functor (function and closure).
 
 > **NB:** here there is potentially two different functors, namely the one stored and the one to assign.
 
-> **NB:** here `Functor` is a *forwarding reference*, not necessarily an r-value reference.
+> **NB:** here `Functor` is a *forwarding reference*, not necessarily a r-value reference.
 
 &nbsp;
 
