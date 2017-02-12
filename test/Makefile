@@ -11,9 +11,9 @@ OBJS     := $(SRCS:%=%.o)
 AS       := $(AS)
 ASFLAGS  :=
 CC       := clang
-CCFLAGS  := -Wall -Wfatal-errors -O0 -g -std=c11 -I$(HDR)
+CCFLAGS  := -Wall -Wfatal-errors -O2 -std=c11 -I$(HDR)
 CXX      := clang++
-CXXFLAGS := -Wall -Wfatal-errors -O0 -g -std=c++14 -I$(HDR)
+CXXFLAGS := -Wall -Wfatal-errors -O2 -std=c++14 -I$(HDR)
 LD       := clang++
 LDFLAGS  :=
 
