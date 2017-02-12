@@ -1,6 +1,6 @@
 /**
  * @file   anyfunction.hpp
- * @author Sébastien Rouault <sebastien.rouault@epfl.ch>
+ * @author Sébastien Rouault <sebmsg@free.fr>
  *
  * @section LICENSE
  *
@@ -50,7 +50,7 @@ namespace Exception {
          * @return Explanatory string \
         **/ \
         virtual char const* what() const noexcept { \
-            return "function: " text; \
+            return "anyfunction: " text; \
         } \
     }
 
@@ -239,7 +239,7 @@ protected:
                     func.manager(ptr, Command::copy_construct, func.instance); // Can throw
                     instance = ptr;
                     status = Status::local;
-                } else { // Heap allocation to do/take over
+                } else { // Heap allocation to do
                     instance = func.manager(nullptr, Command::copy_allocate, func.instance).ptr; // Can throw
                     status = Status::remote;
                 }
@@ -258,6 +258,7 @@ protected:
             case Status::standalone:
                 function = func.function;
                 status = Status::standalone;
+                func.status = Status::invalid; // Other function holder is then invalid (for consistency with other status)
                 break;
             case Status::local: {
                 auto ptr = local_alloc(func.manager);
@@ -265,20 +266,20 @@ protected:
                     func.manager(ptr, Command::move_construct, func.instance); // Can throw
                     instance = ptr;
                     status = Status::local;
-                } else { // Heap allocation to do/take over
+                } else { // Heap allocation to do
                     instance = func.manager(nullptr, Command::move_allocate, func.instance).ptr; // Can throw
                     status = Status::remote;
                 }
-                func.clear(); // Other function holder is then invalid
                 invoker = func.invoker;
                 manager = func.manager;
+                func.clear(); // Other function holder is then invalid
             } break;
-            case Status::remote: { // Just move instance
+            case Status::remote: { // Just take over instance
                 instance = func.instance;
-                func.status = Status::invalid; // Other function holder is then invalid
                 status = Status::remote;
                 invoker = func.invoker;
                 manager = func.manager;
+                func.status = Status::invalid; // Other function holder is then invalid
             } break;
         }
     }
@@ -289,7 +290,7 @@ protected:
         using Functor = typename ::std::decay<Type>::type;
         { // Check functor callability
             using ResultOf = typename ::std::result_of<Functor(Args...)>::type; // Since C++14, not defined if function can not be called with the arguments
-            static_assert(::std::is_same<Return, ResultOf>::value || ::std::is_base_of<Return, ResultOf>::value, "'Functor' result type is incompatible");
+            static_assert(::std::is_same<Return, ResultOf>::value || ::std::is_base_of<Return, ResultOf>::value, "'Functor' result type is incompatible"); // '::std::is_same' needed for fundamental types
         }
         auto ptr = local_alloc<Functor>();
         if (ptr) { // Local allocation done
@@ -307,8 +308,8 @@ public:
     /** No functor constructor/assignment.
      * @return Current instance
     **/
-    Function(): status(Status::invalid) {}
-    Function(::std::nullptr_t): Function() {}
+    Function() noexcept: status(Status::invalid) {}
+    Function(::std::nullptr_t) noexcept: Function() {}
     Function& operator=(::std::nullptr_t) {
         clear();
         return *this;
@@ -334,7 +335,7 @@ public:
         return *this;
     }
     /** Function holder move constructor/assignment.
-     * @param func Function holder to move
+     * @param func Function holder to move; if no exception occurs, gets invalidated, otherwise left untouched by the holder (so actual exception safety only depends on the functor itself)
      * @return Current instance
     **/
     Function(Function<Return(Args...), local_storage_size>&& func): status(Status::invalid) {
@@ -357,7 +358,7 @@ public:
      * @param func Standalone function
      * @return Current instance
     **/
-    Function(Standalone func): status(Status::standalone), function(func) {}
+    Function(Standalone func) noexcept: status(Status::standalone), function(func) {}
     Function& operator=(Standalone func) {
         clear();
         function = func;
@@ -385,7 +386,7 @@ public:
     /** Tell whether a functor is held, and so is callable.
      * @return True if held a functor, false otherwise
     **/
-    operator bool() {
+    operator bool() const noexcept {
         return status != Status::invalid;
     }
     /** Call the held function with the given parameters.
@@ -413,12 +414,12 @@ public:
                 status = Status::invalid;
                 break;
             case Status::local:
-                manager(instance, Command::destroy, nullptr); // Destroy instance
-                status = Status::invalid;
+                manager(instance, Command::destroy, nullptr); // Destroy instance (can throw exception)
+                status = Status::invalid; // Must happen after destruction, so actual exception safety depends on the functor itself
                 break;
             case Status::remote:
-                manager(instance, Command::free, nullptr); // Delete instance
-                status = Status::invalid;
+                manager(instance, Command::free, nullptr); // Delete instance (can throw exception)
+                status = Status::invalid; // Must happen after destruction, so actual exception safety depends on the functor itself
                 break;
         }
     }
