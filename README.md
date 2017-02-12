@@ -54,8 +54,6 @@ Exception tree in namespace `AnyFunction`:
 
 ### class `AnyFunction::Function<Return(Args...), size>`
 
-&nbsp;
-
 #### Public member methods:
 
 &nbsp;
