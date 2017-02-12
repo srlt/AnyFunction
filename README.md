@@ -34,7 +34,7 @@ Exception tree in namespace `AnyFunction`:
 | Tree | Description |
 | :--- | :---------- |
 | `Exception::Any` | Any exception of from this library. |
-| -&nbsp;`Exception::None` | When a $Function$ instance is called while not holding any functor. |
+| -&nbsp;`Exception::None` | When a `Function` instance is called while not holding any functor. |
 
 ### template class `AnyFunction::Function`
 
@@ -62,6 +62,7 @@ Construct an empty *function holder*.
 
 > **Exception safety:** never throws.
 
+&nbsp;
 
 Clear a *function holder*.
 
@@ -76,6 +77,7 @@ Clear a *function holder*.
 
 > **Exception safety:** strong guarantee at best, or same as the stored functor (if any) *destructor* and `operator delete` if worst.
 
+&nbsp;
 
 Construct with a standalone function (no closure).
 
@@ -87,6 +89,7 @@ Construct with a standalone function (no closure).
 
 > **Exception safety:** never throws.
 
+&nbsp;
 
 Assign a standalone function (no closure).
 
@@ -100,6 +103,7 @@ Assign a standalone function (no closure).
 
 > **Exception safety:** strong guarantee at best, or same as the stored functor (if any) *destructor* and `operator delete` if worst.
 
+&nbsp;
 
 Construct with a functor (function and closure).
 
@@ -114,6 +118,7 @@ Construct with a functor (function and closure).
 
 > **NB:** here `Functor` is a *forwarding reference*, not necessarily an r-value reference.
 
+&nbsp;
 
 Assign a functor (function and closure).
 
@@ -132,6 +137,7 @@ Assign a functor (function and closure).
 
 > **NB:** here `Functor` is a *forwarding reference*, not necessarily an r-value reference.
 
+&nbsp;
 
 Copy/move construction from a compatible *function holder* instance.
 
@@ -145,6 +151,7 @@ Copy/move construction from a compatible *function holder* instance.
 
 > **Exception safety:** same as functor selected *constructor* and `operator new`.
 
+&nbsp;
 
 Copy/move assignment from a compatible *function holder* instance.
 
@@ -164,6 +171,7 @@ Copy/move assignment from a compatible *function holder* instance.
 
 > **NB:** *undefined behavior* if `func` is a reference to the assigned instance.
 
+&nbsp;
 
 Destroy a *function holder*.
 
@@ -171,6 +179,7 @@ Destroy a *function holder*.
 
 > **Exception safety:** never throws, or same guarantee as the stored functor (if any) *destructor* and `operator delete` if at least one do.
 
+&nbsp;
 
 Tell whether the current *function holder* is callable.
 
@@ -180,6 +189,7 @@ Tell whether the current *function holder* is callable.
 
 > **Exception safety:** never throws.
 
+&nbsp;
 
 Call the held function with the given parameters.
 
