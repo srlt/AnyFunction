@@ -233,7 +233,7 @@ protected:
                 status = Status::standalone;
                 break;
             case Status::local:
-            case Status::remote:
+            case Status::remote: {
                 auto ptr = local_alloc(func.manager);
                 if (ptr) { // Local allocation done
                     func.manager(ptr, Command::copy_construct, func.instance); // Can throw
@@ -245,7 +245,7 @@ protected:
                 }
                 invoker = func.invoker;
                 manager = func.manager;
-                break;
+            } break;
         }
     }
     /** Move functor via manager.
@@ -259,27 +259,27 @@ protected:
                 function = func.function;
                 status = Status::standalone;
                 break;
-            case Status::local:
-            case Status::remote:
+            case Status::local: {
                 auto ptr = local_alloc(func.manager);
                 if (ptr) { // Local allocation done
                     func.manager(ptr, Command::move_construct, func.instance); // Can throw
-                    func.clear(); // Other function holder is then invalid
                     instance = ptr;
                     status = Status::local;
                 } else { // Heap allocation to do/take over
-                    if (func.status == Status::remote) { // Just take over instance
-                        instance = func.instance;
-                        func.status = Status::invalid; // Other function holder is then invalid
-                    } else {
-                        instance = func.manager(nullptr, Command::move_allocate, func.instance).ptr; // Can throw
-                        func.clear(); // Other function holder is then invalid
-                    }
+                    instance = func.manager(nullptr, Command::move_allocate, func.instance).ptr; // Can throw
                     status = Status::remote;
                 }
+                func.clear(); // Other function holder is then invalid
                 invoker = func.invoker;
                 manager = func.manager;
-                break;
+            } break;
+            case Status::remote: { // Just move instance
+                instance = func.instance;
+                func.status = Status::invalid; // Other function holder is then invalid
+                status = Status::remote;
+                invoker = func.invoker;
+                manager = func.manager;
+            } break;
         }
     }
     /** Copy/move functor via class.
