@@ -37,6 +37,8 @@ Exception tree in namespace `AnyFunction`:
 | `Exception::Any` | Any exception of from this library. |
 | ‣&nbsp;`Exception::None` | When a `Function` instance is called while not holding any functor. |
 
+&nbsp;
+
 ### template class `AnyFunction::Function`
 
 | Parameter | Description |
@@ -48,7 +50,11 @@ Exception tree in namespace `AnyFunction`:
 
 > **NB:** methods from `AnyFunction::Function` instances are not *thread-safe*.
 
+&nbsp;
+
 ### class `AnyFunction::Function<Return(Args...), size>`
+
+&nbsp;
 
 #### Public member methods:
 
