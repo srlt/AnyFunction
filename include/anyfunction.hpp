@@ -16,7 +16,7 @@
  *
  * @section DESCRIPTION
  *
- * A replacement for std::function that fully supports move semantic for the functor.
+ * A replacement for std::function, with hybrid memory allocation (internal storage/heap) for the closure.
 **/
 
 #pragma once
