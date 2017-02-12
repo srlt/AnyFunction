@@ -31,10 +31,11 @@ The functor used with `AnyFunction::Function` must meet the requirements of:
 ## Reference
 
 Exception tree in namespace `AnyFunction`:
+
 | Tree | Description |
 | :--- | :---------- |
 | `Exception::Any` | Any exception of from this library. |
-| -&nbsp;`Exception::None` | When a `Function` instance is called while not holding any functor. |
+| ‣&nbsp;`Exception::None` | When a `Function` instance is called while not holding any functor. |
 
 ### template class `AnyFunction::Function`
 
@@ -50,6 +51,8 @@ Exception tree in namespace `AnyFunction`:
 ### class `AnyFunction::Function<Return(Args...), size>`
 
 #### Public member methods:
+
+&nbsp;
 
 Construct an empty *function holder*.
 
