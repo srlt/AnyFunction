@@ -3,26 +3,38 @@
 ## Overview
 
 `AnyFunction::Function` is a C++14 remplacement for `std::function`, with hybrid memory allocation.
-Small enough closures are stored in an internal storage,
+Small enough closures are stored in an *internal storage*,
 while larger ones get allocated on the heap.
 
 Contrary to `std::function` (as with C++14), `AnyFunction::Function` provides:
 
-* Closure storage inside `AnyFunction::Function` class instances. The size of this internal storage is a template parameter. (Of course, the implementation always provides storage aligned according to the functor requirements.)
+* Closure storage inside `AnyFunction::Function` class instances. The size of this *internal storage* is a template parameter. (Of course, the implementation always provides storage aligned according to the closure requirements.)
 
-Contrary to `std::function` (as with C++14), `AnyFunction::Function` **does not** provides:
+Contrary to `std::function` (as with C++14), `AnyFunction::Function` **does not** provide:
 
-* Use of a specific allocator (here, operators `new` and `delete` of the functor class are always used).
-* Direct access to the functor instance and its *type info*.
+* Use of a specific allocator (here, operators `new` and `delete` of the closure class are always used).
+* Direct access to the closure instance and its *type info*.
 * Non-member `std::swap` and comparison operators specializations.
+
+## Dependencies
+
+This header-only library is written following the C++14 standard revision.
+
+It only depends on the C++14 standard library.
 
 ## Usage
 
-This header-only library is written for the C++14 standard revision.
-
 The usage of `AnyFunction::Function` is very similar to `std::function` (as with C++14).
 
-The functor used with `AnyFunction::Function` must meet the requirements of:
+An instance of `AnyFunction::Function` can either store:
+
+* Nothing (then it is not callable).
+* A plain function pointer.
+* A *closure*: a plain function pointer and a (possibly modifiable) state.
+
+For instance, C++ *lambda expressions* and `std::bind` produce closures.
+
+More generally, a valid closure for this library is any class instance that meets the following requirements:
 
 * *CopyConstructible*
 * *Destructible*
@@ -30,12 +42,12 @@ The functor used with `AnyFunction::Function` must meet the requirements of:
 
 ## Reference
 
-Exception tree in namespace `AnyFunction`:
+Exception tree in the namespace `AnyFunction`:
 
 | Tree | Description |
 | :--- | :---------- |
 | `Exception::Any` | Any exception of from this library. |
-| ‣&nbsp;`Exception::None` | When a `Function` instance is called while not holding any functor. |
+| ‣&nbsp;`Exception::None` | When a `Function` instance is called while not holding any function/closure. |
 
 &nbsp;
 
@@ -82,7 +94,7 @@ Clear a *function holder*.
 
 **Return:** current *function holder* instance.
 
-> **Exception safety:** strong guarantee at best, or same as the stored functor (if any) *destructor* and `operator delete` if worst.
+> **Exception safety:** never throws (if no closure is currently stored), or same guarantee as the stored closure *destructor* and `operator delete`.
 
 &nbsp;
 
@@ -108,39 +120,39 @@ Assign a standalone function (no closure).
 
 **Return:** current *function holder* instance.
 
-> **Exception safety:** strong guarantee at best, or same as the stored functor (if any) *destructor* and `operator delete` if worst.
+> **Exception safety:** never throws (if no closure is currently stored), or same guarantee as the stored closure *destructor* and `operator delete`.
 
 &nbsp;
 
-Construct with a functor (function and closure).
+Construct with a closure (function and closure).
 
 * `Function(Functor&& func);`
 
 | Parameter | Description |
 | :-------- | :---------- |
-| `class Functor` | [deducible] Any functor class. |
-| `func` | Reference to the functor to copy/move. |
+| `class Functor` | [template, deducible] Any closure class. |
+| `func` | Reference to the closure to copy/move. |
 
-> **Exception safety:** same as functor selected *constructor* and `operator new`.
+> **Exception safety:** same guarantee as the stored closure *constructor* and `operator new`.
 
 > **NB:** here `Functor` is a *forwarding reference*, not necessarily a r-value reference.
 
 &nbsp;
 
-Assign a functor (function and closure).
+Assign a closure (function and closure).
 
 * `Function& operator=(Functor&& func);`
 
 | Parameter | Description |
 | :-------- | :---------- |
-| `class Functor` | [deducible] Any functor class. |
-| `func` | Reference to the functor to copy/move. |
+| `class Functor` | [template, deducible] Any closure class. |
+| `func` | Reference to the closure to copy/move. |
 
 **Return:** current *function holder* instance.
 
-> **Exception safety:** basic guarantee at best, or same as **functors** selected *constructor*, *destructor*, *operators* `new` and `delete` if worst.
+> **Exception safety:** basic guarantee (at best), or same as **closures** selected *constructor*, *destructor*, `operator new` and `operator delete` (if worse).
 
-> **NB:** here there is potentially two different functors, namely the one stored and the one to assign.
+> **NB:** here there is potentially two different closures, namely the one stored and the one to assign.
 
 > **NB:** here `Functor` is a *forwarding reference*, not necessarily a r-value reference.
 
@@ -153,10 +165,12 @@ Copy/move construction from a compatible *function holder* instance.
 
 | Parameter | Description |
 | :-------- | :---------- |
-| `size_t func_size` | [deducible] Compatible *function holder* storage size. |
+| `size_t func_size` | [template, deducible] *Function holder* storage size. |
 | `func` | Reference to the *function holder* instance to copy/move. |
 
-> **Exception safety:** same as functor selected *constructor* and `operator new`.
+> **Exception safety:** same guarantee as the stored closure *constructor* and `operator new`.
+
+> **NB:** moving a *function holder* does not necessarily imply calling the *move constructor* of the moved closure (if any).
 
 &nbsp;
 
@@ -167,14 +181,16 @@ Copy/move assignment from a compatible *function holder* instance.
 
 | Parameter | Description |
 | :-------- | :---------- |
-| `size_t func_size` | [deducible] Compatible *function holder* storage size. |
+| `size_t func_size` | [template, deducible] *Function holder* storage size. |
 | `func` | Reference to the *function holder* instance to copy/move. |
 
 **Return:** current *function holder* instance.
 
-> **Exception safety:** basic guarantee at best, or same as **functors** selected *constructor*, *destructor*, *operators* `new` and `delete` if worst.
+> **Exception safety:** basic guarantee (at best), or same as **closures** selected *constructor*, *destructor*, `operator new` and `operator delete` (if worse).
 
-> **NB:** here there is potentially two different functors, namely the one stored and the one to assign.
+> **NB:** here there is potentially two different closures, namely the one stored and the one to assign.
+
+> **NB:** moving a *function holder* does not necessarily imply calling the *move constructor* of the moved closure (if any).
 
 > **NB:** *undefined behavior* if `func` is a reference to the assigned instance.
 
@@ -184,7 +200,7 @@ Destroy a *function holder*.
 
 * `~Function();`
 
-> **Exception safety:** never throws, or same guarantee as the stored functor (if any) *destructor* and `operator delete` if at least one do.
+> **Exception safety:** never throws (if no closure is currently stored), or same guarantee as the stored closure *destructor* and `operator delete`.
 
 &nbsp;
 
@@ -192,7 +208,7 @@ Tell whether the current *function holder* is callable.
 
 * `operator bool() const;`
 
-**Return:** `true` if the current *function holder* is callable, `false` otherwise.
+**Return:** `true` if the *function holder* holds a function/closure, `false` otherwise.
 
 > **Exception safety:** never throws.
 
