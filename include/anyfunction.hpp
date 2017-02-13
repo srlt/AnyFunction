@@ -57,7 +57,7 @@ namespace Exception {
 /** Exceptions tree.
 **/
 EXCEPTION(Any, ::std::exception, "exception");
-    EXCEPTION(None, Any, "no function to call");
+    EXCEPTION(Empty, Any, "no function to call");
 
 #undef EXCEPTION
 
@@ -309,7 +309,7 @@ public:
      * @return Current instance
     **/
     Function() noexcept: status(Status::invalid) {}
-    Function(::std::nullptr_t) noexcept: Function() {}
+    Function(::std::nullptr_t) noexcept(noexcept(Function())): Function() {}
     Function& operator=(::std::nullptr_t) {
         clear();
         return *this;
@@ -396,7 +396,7 @@ public:
     Return operator()(Args... args) {
         switch (status) {
             case Status::invalid:
-                throw Exception::None();
+                throw Exception::Empty();
             case Status::standalone:
                 return function(::std::forward<Args>(args)...);
             case Status::local:

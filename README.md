@@ -42,12 +42,12 @@ More generally, a valid closure for this library is any class instance that meet
 
 ## Reference
 
-Exception tree in the namespace `AnyFunction`:
+Exceptions tree in the namespace `AnyFunction`:
 
 | Tree | Description |
 | :--- | :---------- |
 | `Exception::Any` | Any exception of from this library. |
-| ‣&nbsp;`Exception::None` | When a `Function` instance is called while not holding any function/closure. |
+| ‣&nbsp;`Exception::Empty` | When a `Function` instance is called while not holding any function/closure. |
 
 &nbsp;
 
