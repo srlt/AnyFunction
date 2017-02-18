@@ -42,9 +42,9 @@ More generally, a valid closure for this library is any class instance that meet
 
 ## Example
 
-```c_cpp
+```c++
 #include <anyfunction.hpp>
-#include <functional> // For std::mem_fn
+#include <functional> // For std::mem_fn and std::bind
 
 static float func_diff(float x, float y) {
     return x - y;
