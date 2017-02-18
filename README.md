@@ -8,7 +8,7 @@ while larger ones get allocated on the heap.
 
 Contrary to `std::function` (as with C++14), `AnyFunction::Function` provides:
 
-* Closure storage inside `AnyFunction::Function` class instances. The size of this *internal storage* is a template parameter. (Of course, the implementation always provides storage aligned according to the closure requirements.)
+* Closure storage inside `AnyFunction::Function` class instances. The size of this *internal storage* is a template parameter. (Of course, the implementation always provides storage aligned following the closure requirements.)
 
 Contrary to `std::function` (as with C++14), `AnyFunction::Function` **does not** provide:
 
@@ -39,6 +39,66 @@ More generally, a valid closure for this library is any class instance that meet
 * *CopyConstructible*
 * *Destructible*
 * *Callable*
+
+## Example
+
+```c_cpp
+#include <anyfunction.hpp>
+#include <functional> // For std::mem_fn
+
+static float func_diff(float x, float y) {
+    return x - y;
+}
+
+struct Adder {
+    int v;
+    Adder(int v): v(v) {}
+    int add(int x) const { return v + x; }
+};
+
+int main(int, char**) {
+    using namespace AnyFunction;
+    using namespace std::placeholders; // For _1, _2, _3, ...
+
+    // Stores a "standalone" function
+    Function<float(float, float)> diff = func_diff;
+    diff(2, 1); // Returns 1 = 2 - 1
+
+    // Stores a closure (lambda)
+    // Internal storage size set to 64 bytes
+    Function<float(float), 64> twice = [diff](float x) mutable -> float {
+        return diff(x, -x);
+    };
+    twice(1); // Returns 2 = 1 - (-1)
+
+    // Copy/move to "compatible" 'Function' instances
+    Function<float(float), 0>  twiceCopy = twice;
+    Function<float(float), 16> twiceMove = ::std::move(twice);
+
+    // Test "callability"
+    if (twice) { // 'twice' is always invalid after move
+        // Branch not taken
+    }
+    twice = ::std::move(twiceCopy);
+    if (twice) {
+        // Branch taken
+    }
+
+    // Reset function
+    diff = nullptr;
+    // diff(2, 1); // Would throw Exception::Empty()
+
+    // Stores a closure (bind)
+    diff = std::bind(func_diff, _2, _1);
+    diff(-2, 1); // Returns 3 = 1 - (-2)
+
+    // Use of 'std::mem_fn' for member functions/variables
+    Function<int(Adder&&, int)> add = std::mem_fn(&Adder::add);
+    add(Adder{2}, twice(1)); // Returns 4 = 2 + (1 - (-1))
+
+    return 0;
+}
+```
 
 ## Reference
 
@@ -98,7 +158,7 @@ Clear a *function holder*.
 
 &nbsp;
 
-Construct with a standalone function (no closure).
+Construct with a standalone function.
 
 * `Function(Return (*func)(Args...));`
 
@@ -110,7 +170,7 @@ Construct with a standalone function (no closure).
 
 &nbsp;
 
-Assign a standalone function (no closure).
+Assign a standalone function.
 
 * `Function& operator=(Return (*func)(Args...));`
 
@@ -124,7 +184,7 @@ Assign a standalone function (no closure).
 
 &nbsp;
 
-Construct with a closure (function and closure).
+Construct with a closure.
 
 * `Function(Functor&& func);`
 
@@ -139,7 +199,7 @@ Construct with a closure (function and closure).
 
 &nbsp;
 
-Assign a closure (function and closure).
+Assign a closure.
 
 * `Function& operator=(Functor&& func);`
 
