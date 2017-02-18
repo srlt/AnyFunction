@@ -2,9 +2,8 @@
 
 ## Overview
 
-`AnyFunction::Function` is a C++14 remplacement for `std::function`, with hybrid memory allocation.
-Small enough closures are stored in an *internal storage*,
-while larger ones get allocated on the heap.
+`AnyFunction::Function` is an alternative for `std::function`.
+It supports hybrid memory allocation: small enough closures are stored in an *internal storage*, while larger ones get allocated on the heap.
 
 Contrary to `std::function` (as with C++14), `AnyFunction::Function` provides:
 
